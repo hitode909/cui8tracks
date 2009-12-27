@@ -12,7 +12,7 @@ $opts = { }
 OptionParser.new {|opt|
   opt.on('-q QUERY', '--query') {|v| $opts[:q] = v}
   opt.on('-t TAG', '--tag')   {|v| $opts[:tag] = v}
-  opt.on('-d DJ', '--dj')  {|v| $opts[:dj] = v}
+  opt.on('-u USER', '--user')  {|v| $opts[:user] = v}
   opt.on('-s SORT', '--sort', '[recent|popular|random]')  {|v| $opts[:sort] = v}
   opt.on('--quiet')  {|v| $opts[:quiet] = v}
   opt.parse!(ARGV)
@@ -34,13 +34,13 @@ end
 
 def mixes_path
   $logger.warn "Sort should recent, popular or random. " if $opts[:sort] and not %w{recent popular random}.include?($opts[:sort])
-  if $opts[:dj]
+  if $opts[:user]
     $logger.warn "Tag will be ignored." if $opts[:tag]
     $logger.warn "Query will be ignored." if $opts[:q]
     $logger.warn "Sort will be ignored." if $opts[:sort]
-    "http://api.8tracks.com/users/#{$opts[:dj]}/mix_feed.json"
+    "http://api.8tracks.com/users/#{$opts[:user]}/mix_feed.json"
   else
-    $logger.warn "Dj will be ignored." if $opts[:dj]
+    $logger.warn "User will be ignored." if $opts[:user]
     $logger.warn "Tag will be ignored." if $opts[:tag] and $opts[:q]
     "http://api.8tracks.com/mixes.json#{queries}"
   end

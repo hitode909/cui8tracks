@@ -8,7 +8,7 @@ require 'pit'
 require 'optparse'
 
 opt = OptionParser.new
-$opts = { }
+$opts = {:per_page => 10, :page => 1 }
 
 OptionParser.new {|opt|
   opt.on('-q QUERY', '--query') {|v| $opts[:q] = v}
@@ -31,7 +31,7 @@ $config = Pit.get('8tracks_api', :require => {
 
 def queries
   q = []
-  %w{q tag sort}.map(&:to_sym).each{|key|
+  %w{q tag sort page per_page}.map(&:to_sym).each{|key|
     q.push("#{key}=#{$opts[key]}") if $opts[key]
   }
   q.empty? ? '' : '?' + q.join('&')
@@ -43,7 +43,7 @@ def mixes_path
     $logger.warn "Tag will be ignored." if $opts[:tag]
     $logger.warn "Query will be ignored." if $opts[:q]
     $logger.warn "Sort will be ignored." if $opts[:sort]
-    "http://api.8tracks.com/users/#{$opts[:user]}/mix_feed.json"
+    "http://api.8tracks.com/users/#{$opts[:user]}/mix_feed.json#{queries}"
   else
     $logger.warn "User will be ignored." if $opts[:user]
     $logger.warn "Tag will be ignored." if $opts[:tag] and $opts[:q]
@@ -69,18 +69,26 @@ def play(track)
   return true
 end
 
-mixes = json(mixes_path)['mixes']
 set   = json("http://api.8tracks.com/sets/new.json")
 
-mixes.each{|mix|
-  $logger.info "mix: #{mix['name']}"
-  $logger.info "user: #{mix['user']['slug']}"
-  $logger.info "description: #{mix['description']}"
-  $logger.info "url: #{mix['restful_url']}"
-  play json("http://api.8tracks.com/sets/#{set['play_token']}/play.json?mix_id=#{mix['id']}")['track']
-  loop {
-    got = json("http://api.8tracks.com/sets/#{set['play_token']}/next.json?mix_id=#{mix['id']}")
-    break if got['track']['trackId'] == 0
-    play(got['track']) or exit
+loop {
+  mixes = json(mixes_path)
+  mixes['mixes'].each_with_index{ |mix, index|
+    index = ($opts[:page] - 1) * $opts[:per_page] + index + 1
+    $logger.info "index: #{index} / #{mixes['total_entries']}"
+    $logger.info "mix: #{mix['name']}"
+    $logger.info "user: #{mix['user']['slug']}"
+    $logger.info "description: #{mix['description']}"
+    $logger.info "url: #{mix['restful_url']}"
+    play json("http://api.8tracks.com/sets/#{set['play_token']}/play.json?mix_id=#{mix['id']}")['track']
+    loop {
+      got = json("http://api.8tracks.com/sets/#{set['play_token']}/next.json?mix_id=#{mix['id']}")
+      break if got['track']['trackId'] == 0
+      play(got['track']) or exit
+    }
+    if index == mixes['total_entries']
+      $opts[:page] = 0
+    end
   }
+  $opts[:page] += 1
 }

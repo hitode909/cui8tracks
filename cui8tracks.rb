@@ -56,12 +56,45 @@ def json(path)
   JSON.parse(open(path, :http_basic_authentication => [$config['accesskey'], $config['secretkey']]).read)
 end
 
+def prepare_file(url)
+  unless File.directory?('cache')
+    $logger.debug('make cache directory')
+    Dir.mkdir('cache')
+  end
+  file_path = 'cache/' + url.gsub(File.extname(url), '').gsub(/[^\w]/, '_') + File.extname(url)
+  unless File.exist?(file_path)
+    begin
+      $logger.info "downloading #{url}"
+      total = nil
+      open(file_path, 'w') {|local|
+        got = open(url,
+          :content_length_proc => proc{|_total|
+            total = _total
+          },
+          :progress_proc => proc{ |now|
+            print "%3d%% #{now}/#{total}\r" % (now/total.to_f*100)
+            $stdout.flush
+          }
+          ) {|remote|
+          local.write(remote.read)
+        }
+      }
+    rescue => e
+      $logger.fatal "failed to download #{url}"
+      File.unlink(file_path) if File.exist?(file_path)
+      exit 1
+    end
+  end
+  file_path
+end
+
 def play(track)
   $logger.info "track: #{track['title']}"
   $logger.info "album: #{track['album']}"
   $logger.info "contributor: #{track['contributor']}"
   $logger.info "url: #{track['referenceUrl']}"
-  cmd = "mplayer #{track['item']}"
+  path = prepare_file(track['item'])
+  cmd = "mplayer #{path}"
   cmd += " >& /dev/null" unless $opts[:verbose]
   $logger.debug cmd
   $logger.info "p to play/pause, q to skip, C-c to exit."

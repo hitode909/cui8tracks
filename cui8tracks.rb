@@ -14,11 +14,15 @@ OptionParser.new {|opt|
   opt.on('-t TAG', '--tag')   {|v| $opts[:tag] = v}
   opt.on('-u USER', '--user')  {|v| $opts[:user] = v}
   opt.on('-s SORT', '--sort', '[recent|popular|random]')  {|v| $opts[:sort] = v}
-  opt.on('--quiet')  {|v| $opts[:quiet] = v}
+  opt.on('--verbose', 'print mplayer output')  {|v| $opts[:verbose] = v}
+  opt.on('--debug', 'debug-mode')  {|v| $opts[:debug] = v}
   opt.parse!(ARGV)
 }
 
 $logger = Logger.new STDOUT
+$logger.level = $opts[:debug] ? Logger::DEBUG : Logger::INFO
+$logger.debug $opts
+
 $config = Pit.get('8tracks_api', :require => {
     'accesskey' => 'your accesskey in 8tracks api(http://developer.8tracks.com/)',
     'secretkey' => 'your secretkey in 8tracks api(http://developer.8tracks.com/)',
@@ -52,15 +56,14 @@ def json(path)
 end
 
 def play(track)
-  return nil if track['trackId'] == 0
   $logger.info "track: #{track['title']}"
   $logger.info "album: #{track['album']}"
   $logger.info "contributor: #{track['contributor']}"
   $logger.info "url: #{track['referenceUrl']}"
   cmd = "mplayer #{track['item']}"
-  cmd += " >& /dev/null" if $opts[:quiet]
+  cmd += " >& /dev/null" unless $opts[:verbose]
   $logger.debug cmd
-  $logger.debug "p to play/pause, q to skip, C-c to exit."
+  $logger.info "p to play/pause, q to skip, C-c to exit."
   system(cmd) or return nil
   return true
 end
@@ -75,6 +78,8 @@ mixes.each{|mix|
   $logger.info "url: #{mix['restful_url']}"
   play json("http://api.8tracks.com/sets/#{set['play_token']}/play.json?mix_id=#{mix['id']}")['track']
   loop {
-    play(json("http://api.8tracks.com/sets/#{set['play_token']}/next.json?mix_id=#{mix['id']}")['track']) or exit
+    got = json("http://api.8tracks.com/sets/#{set['play_token']}/next.json?mix_id=#{mix['id']}")
+    break if got['track']['trackId'] == 0
+    play(got['track']) or exit
   }
 }

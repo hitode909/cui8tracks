@@ -14,6 +14,7 @@ OptionParser.new {|opt|
   opt.on('-t TAG', '--tag')   {|v| $opts[:tag] = v}
   opt.on('-d DJ', '--dj')  {|v| $opts[:dj] = v}
   opt.on('-s SORT', '--sort', '[recent|popular|random]')  {|v| $opts[:sort] = v}
+  opt.on('--quiet')  {|v| $opts[:quiet] = v}
   opt.parse!(ARGV)
 }
 
@@ -57,7 +58,9 @@ def play(track)
   $logger.info "contributor: #{track['contributor']}"
   $logger.info "url: #{track['referenceUrl']}"
   cmd = "mplayer #{track['item']}"
+  cmd += " >& /dev/null" if $opts[:quiet]
   $logger.debug cmd
+  $logger.debug "p to play/pause, q to skip, C-c to exit."
   system(cmd) or return nil
   return true
 end

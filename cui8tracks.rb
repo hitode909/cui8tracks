@@ -52,7 +52,10 @@ end
 
 def play(track)
   return nil if track['trackId'] == 0
-  $logger.info "playing track #{track['album']} - #{track['title']}"
+  $logger.info "track: #{track['title']}"
+  $logger.info "album: #{track['album']}"
+  $logger.info "contributor: #{track['contributor']}"
+  $logger.info "url: #{track['referenceUrl']}"
   cmd = "mplayer #{track['item']}"
   $logger.debug cmd
   system(cmd) or return nil
@@ -63,7 +66,10 @@ mixes = json(mixes_path)['mixes']
 set   = json("http://api.8tracks.com/sets/new.json")
 
 mixes.each{|mix|
-  $logger.info "playing mix #{mix['name']}"
+  $logger.info "mix: #{mix['name']}"
+  $logger.info "user: #{mix['user']['slug']}"
+  $logger.info "description: #{mix['description']}"
+  $logger.info "url: #{mix['restful_url']}"
   play json("http://api.8tracks.com/sets/#{set['play_token']}/play.json?mix_id=#{mix['id']}")['track']
   loop {
     play(json("http://api.8tracks.com/sets/#{set['play_token']}/next.json?mix_id=#{mix['id']}")['track']) or exit

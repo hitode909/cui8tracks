@@ -80,13 +80,13 @@ rescue => e
   raise 'failed'
 end
 
-def prepare_file(url)
+def prepare_file(url, as = nil)
   unless File.directory?('cache')
     $logger.debug('make cache directory')
     Dir.mkdir('cache')
   end
 
-  file_path = 'cache/' + url.gsub(File.extname(url), '').gsub(/[^\w]/, '_') + File.extname(url)
+  file_path = 'cache/' + (as ? as : url.gsub(File.extname(url), '').gsub(/[^\w]/, '_')) + File.extname(url)
   if File.exist?(file_path)
     $logger.info "has cache: #{file_path}"
     return file_path
@@ -109,7 +109,7 @@ def play(track)
   $logger.info "album: #{track['album']}"
   $logger.info "contributor: #{track['contributor']}"
   $logger.info "url: #{track['referenceUrl']}"
-  path = prepare_file(track['item'])
+  path = prepare_file(track['item'], [track['contributor'], track['title']].map{ |s| s.gsub(/\//, '_')}.join(' - '))
   return if $opts[:no_play]
   cmd = "mplayer #{path}"
   cmd += " >& /dev/null" unless $opts[:verbose]

@@ -62,7 +62,12 @@ def prepare_file(url)
     Dir.mkdir('cache')
   end
   file_path = 'cache/' + url.gsub(File.extname(url), '').gsub(/[^\w]/, '_') + File.extname(url)
-  unless File.exist?(file_path)
+  if File.exist?(file_path)
+    $logger.info "has cache: #{file_path}"
+    return file_path
+  end
+
+  Thread.new{
     begin
       $logger.info "downloading #{url}"
       total = nil
@@ -84,8 +89,9 @@ def prepare_file(url)
       File.unlink(file_path) if File.exist?(file_path)
       exit 1
     end
-  end
-  file_path
+  }
+
+  return url
 end
 
 def play(track)

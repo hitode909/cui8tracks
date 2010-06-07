@@ -74,7 +74,7 @@ def download_url_to_path(url, file_path)
       local.write(remote.read)
     }
   }
-rescue => e
+rescue Exception => e
   $logger.fatal "failed to download #{url}"
   File.unlink(file_path) if File.exist?(file_path)
   raise 'failed'

@@ -26,6 +26,8 @@ $logger = Logger.new STDOUT
 $logger.level = $opts[:debug] ? Logger::DEBUG : Logger::INFO
 $logger.debug $opts
 
+system 'mplayer' or raise 'mplayer seems not installed'
+
 $config = Pit.get('8tracks_api', :require => {
     'accesskey' => 'your accesskey in 8tracks api(http://developer.8tracks.com/)',
     'secretkey' => 'your secretkey in 8tracks api(http://developer.8tracks.com/)',

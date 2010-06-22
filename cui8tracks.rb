@@ -17,6 +17,15 @@ module EightTracks
     @logger
   end
 
+  def method_missing(name, *args, &block)
+    if @data.has_key?(name.to_s)
+      logger.debug "delegate to data: #{name}"
+      @data[name.to_s]
+    else
+      super
+    end
+  end
+
   class API
     include EightTracks
     class LoginError < StandardError
@@ -72,7 +81,116 @@ module EightTracks
 
   end
 
+  class Set
+    include EightTracks
+    attr_accessor :per_page, :page, :sort, :user, :query
+    def initialize
+      @per_page = 2
+      @page = 1
+      @sort = 'recent'
+    end
+
+    def set_auth(api)
+      @api = api
+    end
+
+    attr_reader :mixes
+
+    def get_data
+      @data = @api.get('/sets/new')
+    end
+
+    def get_mixes
+      get_data unless @data
+      @mixes = @api.get(path, query)['mixes'].map{|data|
+        mix = Mix.new(data)
+        mix.set_auth(@api)
+        mix.set_set(self)
+        mix
+      }
+      self
+    end
+
+    def each_mix(&block)
+      get_mixes unless @mixes
+      @mixes.each{ |mix|
+        yield mix
+      }
+    end
+
+    def path
+      @user ? "/users/#{@user}/mix_feed" : "/mixes"
+    end
+
+    def query
+      {
+        :q => @query,
+        :tag => @tag,
+        :sort => @sort,
+        :page => @page,
+        :per_page => @per_page
+      }.each_pair.inject({}){|a, b| b[1] ?  a.update({b[0] => b[1]}) : a }
+    end
+  end
+
+  class Mix
+    include EightTracks
+    def initialize(data)
+      @data = data
+    end
+
+    def id
+      @data['id']
+    end
+
+    def set_auth(api)
+      @api = api
+    end
+
+    def set_set(set)
+      @set = set
+    end
+
+    def set
+      @set
+    end
+
+    def each_track(&block)
+      got = @api.get("/sets/#{set.play_token}/play", {:mix_id => self.id})
+      yield Track.new(got['set']['track'])
+      loop {
+        got = @api.get("/sets/#{set.play_token}/next", {:mix_id => self.id})
+        break if got['set']['at_end']
+        yield Track.new(got['set']['track'])
+      }
+    end
+  end
+
+  class Track
+    def initialize(data)
+      @data = data
+    end
+  end
 end
+
+pit = Pit.get('8tracks_api', :require => {
+    'username' => 'username',
+    'password' => 'password',
+  })
+api = EightTracks::API.new(pit['username'], pit['password'])
+
+set = EightTracks::Set.new
+set.set_auth(api)
+set.mixes.each_mix{ |mix|
+  mix.each_track{ |track|
+    pp track
+    sleep 10
+  }
+  sleep 10
+}
+
+exit
+
 
 def queries
   q = []
@@ -192,11 +310,10 @@ $logger.debug $opts
 
 system 'mplayer >& /dev/null' or raise 'mplayer seems not installed'
 
-pit = Pit.get('8tracks_api', :require => {
-    'username' => 'username',
-    'password' => 'password',
-  })
-$api = EightTracks::API.new(pit['username'], pit['password'])
+
+
+
+__END__
 
 set = api("/sets/new.json")
 
@@ -213,13 +330,13 @@ loop {
     $logger.info "playing mix #{index} / #{mixes['total_entries']}"
     mix.each_key{ |key|
       value = case key
-          when 'cover_urls'
-            mix[key]['original']
-          when 'user'
-            mix[key]['slug']
-          else
-            mix[key]
-          end
+              when 'cover_urls'
+                mix[key]['original']
+              when 'user'
+                mix[key]['slug']
+              else
+                mix[key]
+              end
       $logger.info "#{key}: #{value}"
     }
     play api("/sets/#{set['play_token']}/play.json?mix_id=#{mix['id']}")['set']['track']

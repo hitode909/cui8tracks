@@ -19,11 +19,22 @@ module EightTracks
 
   def method_missing(name, *args, &block)
     if @data.has_key?(name.to_s)
-      logger.debug "delegate to data: #{name}"
       @data[name.to_s]
     else
       super
     end
+  end
+
+  def data
+    @data
+  end
+
+  attr_accessor :api
+
+  def info(data = self.data)
+    data.each_key{ |key|
+      logger.info "#{self.class.to_s}::#{key} = #{data[key]}"
+    }
   end
 
   class API
@@ -90,22 +101,17 @@ module EightTracks
       @sort = 'recent'
     end
 
-    def set_auth(api)
-      @api = api
-    end
-
     attr_reader :mixes
 
-    def get_data
-      @data = @api.get('/sets/new')
+    def data
+      @data ||= @api.get('/sets/new')
     end
 
     def get_mixes
-      get_data unless @data
-      @mixes = @api.get(path, query)['mixes'].map{|data|
-        mix = Mix.new(data)
-        mix.set_auth(@api)
-        mix.set_set(self)
+      @mixes = @api.get(path, query)['mixes'].map{|mix_data|
+        mix = Mix.new(mix_data)
+        mix.api = @api
+        mix.set = self
         mix
       }
       self
@@ -135,24 +141,29 @@ module EightTracks
 
   class Mix
     include EightTracks
+    attr_accessor :set
     def initialize(data)
       @data = data
     end
 
+    def info
+      to_print = { }
+      self.data.each_key{ |key|
+        value = case key
+                when 'cover_urls'
+                  self.data[key]['original']
+                when 'user'
+                  self.data[key]['slug']
+                else
+                  self.data[key]
+                end
+        to_print[key] = value
+      }
+      super(to_print)
+    end
+
     def id
       @data['id']
-    end
-
-    def set_auth(api)
-      @api = api
-    end
-
-    def set_set(set)
-      @set = set
-    end
-
-    def set
-      @set
     end
 
     def each_track(&block)
@@ -167,8 +178,63 @@ module EightTracks
   end
 
   class Track
+    include EightTracks
     def initialize(data)
       @data = data
+    end
+
+    def escape_for_shell(path)
+      escaped = path
+      ' ;&()|^<>?*[]$`"\'{}'.split(//).each{|c|
+        escaped.gsub!(c){ |c| '\\' + c }
+      }
+      escaped
+    end
+
+    def play
+      Thread.new{ self.download } unless self.has_cache?
+      logger.info "cache hit" if self.has_cache?
+      path = self.has_cache? ? self.cache_path : self.url
+      cmd = "mplayer #{escape_for_shell(path)}"
+      cmd += " >& /dev/null"
+      logger.debug cmd
+      logger.info "p to play/pause, q to skip, C-c to exit."
+      system(cmd) or return nil
+      return true
+    end
+
+    def cache_path
+      'cache/' + self.url.gsub(File.extname(url), '').gsub(/[^\w]/, '_') + File.extname(url)
+    end
+
+    def has_cache?
+      File.size? self.cache_path
+    end
+
+    def download
+      unless File.directory?('cache')
+        logger.debug('make cache directory')
+        Dir.mkdir('cache')
+      end
+
+      logger.info "downloading #{self.url}"
+      total = nil
+      open(self.cache_path, 'w') {|local|
+        got = open(url,
+          :content_length_proc => proc{|_total|
+            total = _total
+          },
+          :progress_proc => proc{ |now|
+            print "%3d%% #{now}/#{total}\r" % (now/total.to_f*100)
+            $stdout.flush
+          }
+          ) {|remote|
+          local.write(remote.read)
+        }
+      }
+    rescue Exception => e
+      logger.fatal "failed to download #{self.url}"
+      File.unlink(self.cache_path) if File.exist?(self.cache_path)
     end
   end
 end
@@ -180,13 +246,16 @@ pit = Pit.get('8tracks_api', :require => {
 api = EightTracks::API.new(pit['username'], pit['password'])
 
 set = EightTracks::Set.new
-set.set_auth(api)
-set.mixes.each_mix{ |mix|
+set.api = api
+set.info
+set.each_mix{ |mix|
+  mix.info
   mix.each_track{ |track|
-    pp track
-    sleep 10
+    track.info
+    track.play
+    sleep 3
   }
-  sleep 10
+  sleep 3
 }
 
 exit

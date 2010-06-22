@@ -41,7 +41,7 @@ module EightTracks
     end
 
     def http_request(klass, path, param = { })
-      path += '.json'
+      path += '.json' unless path  =~ /\.json$/
       req = klass.new(path)
       req.basic_auth(@username, @password) if @logged_in
       param_str = to_param_str(param)
@@ -71,19 +71,8 @@ module EightTracks
     end
 
   end
+
 end
-
-pit = Pit.get('8tracks_api', :require => {
-    'username' => 'username',
-    'password' => 'password',
-  })
-
-api = EightTracks::API.new(pit['username'], pit['password'])
-sleep 3
-pp api.get('/mixes', :per_page => 1)
-sleep 3
-pp api.post('/mixes/14/toggle_like')
-exit
 
 def queries
   q = []
@@ -107,15 +96,8 @@ def mixes_path
   end
 end
 
-def json(path)
-  $logger.info "get API #{path}"
-  got = JSON.parse(open(path, :http_basic_authentication => [$config['accesskey'], $config['secretkey']]).read)
-  pp got if $opts[:debug]
-  got
-end
-
 def api(path)
-  json(URI.parse('http://api.8tracks.com/') + path)
+  $api.get(path)
 end
 
 def download_url_to_path(url, file_path)
@@ -210,12 +192,13 @@ $logger.debug $opts
 
 system 'mplayer >& /dev/null' or raise 'mplayer seems not installed'
 
-$config = Pit.get('8tracks_api', :require => {
-    'accesskey' => 'your accesskey in 8tracks api(http://developer.8tracks.com/)',
-    'secretkey' => 'your secretkey in 8tracks api(http://developer.8tracks.com/)',
+pit = Pit.get('8tracks_api', :require => {
+    'username' => 'username',
+    'password' => 'password',
   })
+$api = EightTracks::API.new(pit['username'], pit['password'])
 
-set   = api("/sets/new.json")
+set = api("/sets/new.json")
 
 current = 0
 

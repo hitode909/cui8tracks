@@ -47,11 +47,11 @@ def mixes_path
     $logger.warn "Tag will be ignored." if $opts[:tag]
     $logger.warn "Query will be ignored." if $opts[:q]
     $logger.warn "Sort will be ignored." if $opts[:sort]
-    "http://api.8tracks.com/users/#{$opts[:user]}/mix_feed.json#{queries}"
+    "/users/#{$opts[:user]}/mix_feed.json#{queries}"
   else
     $logger.warn "User will be ignored." if $opts[:user]
     $logger.warn "Tag will be ignored." if $opts[:tag] and $opts[:q]
-    "http://api.8tracks.com/mixes.json#{queries}"
+    "/mixes.json#{queries}"
   end
 end
 
@@ -60,6 +60,10 @@ def json(path)
   got = JSON.parse(open(path, :http_basic_authentication => [$config['accesskey'], $config['secretkey']]).read)
   pp got if $opts[:debug]
   got
+end
+
+def api(path)
+  json(URI.parse('http://api.8tracks.com/') + path)
 end
 
 def download_url_to_path(url, file_path)
@@ -131,12 +135,12 @@ def play(track)
   return true
 end
 
-set   = json("http://api.8tracks.com/sets/new.json")
+set   = api("/sets/new.json")
 
 current = 0
 
 loop {
-  mixes = json(mixes_path)
+  mixes = api(mixes_path)
   mixes['mixes'].each_with_index{ |mix, index|
     if $opts[:from] && current < $opts[:from]
       current += 1
@@ -155,9 +159,9 @@ loop {
           end
       $logger.info "#{key}: #{value}"
     }
-    play json("http://api.8tracks.com/sets/#{set['play_token']}/play.json?mix_id=#{mix['id']}")['set']['track']
+    play api("/sets/#{set['play_token']}/play.json?mix_id=#{mix['id']}")['set']['track']
     loop {
-      got = json("http://api.8tracks.com/sets/#{set['play_token']}/next.json?mix_id=#{mix['id']}")
+      got = api("/sets/#{set['play_token']}/next.json?mix_id=#{mix['id']}")
       break if got['set']['at_end']
       play(got['set']['track']) or exit
     }

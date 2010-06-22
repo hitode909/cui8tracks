@@ -7,31 +7,8 @@ require 'logger'
 require 'pit'
 require 'optparse'
 
-opt = OptionParser.new
-$opts = {:per_page => 2, :page => 1 }
+# methods
 
-OptionParser.new {|opt|
-  opt.on('-q QUERY', '--query') {|v| $opts[:q] = v}
-  opt.on('-t TAG', '--tag')   {|v| $opts[:tag] = v}
-  opt.on('-u USER', '--user')  {|v| $opts[:user] = v}
-  opt.on('-s SORT', '--sort', '[recent|popular|random]')  {|v| $opts[:sort] = v}
-  opt.on('--no-play', "don't play tracks")  {|v| $opts[:no_play] = true}
-  opt.on('--from FROM', 'play from [FROM]th mix')  {|v| $opts[:from] = v.to_i}
-  opt.on('--verbose', 'print mplayer output')  {|v| $opts[:verbose] = v}
-  opt.on('--debug', 'debug-mode')  {|v| $opts[:debug] = v}
-  opt.parse!(ARGV)
-}
-
-$logger = Logger.new STDOUT
-$logger.level = $opts[:debug] ? Logger::DEBUG : Logger::INFO
-$logger.debug $opts
-
-system 'mplayer >& /dev/null' or raise 'mplayer seems not installed'
-
-$config = Pit.get('8tracks_api', :require => {
-    'accesskey' => 'your accesskey in 8tracks api(http://developer.8tracks.com/)',
-    'secretkey' => 'your secretkey in 8tracks api(http://developer.8tracks.com/)',
-  })
 
 def queries
   q = []
@@ -134,6 +111,34 @@ def play(track)
   system(cmd) or return nil
   return true
 end
+
+# main
+
+opt = OptionParser.new
+$opts = {:per_page => 2, :page => 1 }
+
+OptionParser.new {|opt|
+  opt.on('-q QUERY', '--query') {|v| $opts[:q] = v}
+  opt.on('-t TAG', '--tag')   {|v| $opts[:tag] = v}
+  opt.on('-u USER', '--user')  {|v| $opts[:user] = v}
+  opt.on('-s SORT', '--sort', '[recent|popular|random]')  {|v| $opts[:sort] = v}
+  opt.on('--no-play', "don't play tracks")  {|v| $opts[:no_play] = true}
+  opt.on('--from FROM', 'play from [FROM]th mix')  {|v| $opts[:from] = v.to_i}
+  opt.on('--verbose', 'print mplayer output')  {|v| $opts[:verbose] = v}
+  opt.on('--debug', 'debug-mode')  {|v| $opts[:debug] = v}
+  opt.parse!(ARGV)
+}
+
+$logger = Logger.new STDOUT
+$logger.level = $opts[:debug] ? Logger::DEBUG : Logger::INFO
+$logger.debug $opts
+
+system 'mplayer >& /dev/null' or raise 'mplayer seems not installed'
+
+$config = Pit.get('8tracks_api', :require => {
+    'accesskey' => 'your accesskey in 8tracks api(http://developer.8tracks.com/)',
+    'secretkey' => 'your secretkey in 8tracks api(http://developer.8tracks.com/)',
+  })
 
 set   = api("/sets/new.json")
 

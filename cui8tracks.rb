@@ -8,7 +8,7 @@ require 'pit'
 require 'optparse'
 
 opt = OptionParser.new
-$opts = {:per_page => 10, :page => 1 }
+$opts = {:per_page => 2, :page => 1 }
 
 OptionParser.new {|opt|
   opt.on('-q QUERY', '--query') {|v| $opts[:q] = v}
@@ -56,8 +56,10 @@ def mixes_path
 end
 
 def json(path)
-  $logger.debug "get #{path}"
-  JSON.parse(open(path, :http_basic_authentication => [$config['accesskey'], $config['secretkey']]).read)
+  $logger.info "get API #{path}"
+  got = JSON.parse(open(path, :http_basic_authentication => [$config['accesskey'], $config['secretkey']]).read)
+  pp got if $opts[:debug]
+  got
 end
 
 def download_url_to_path(url, file_path)
@@ -96,7 +98,7 @@ def prepare_file(url, as = nil)
 
   if $opts[:no_play]
     download_url_to_path(url, file_path) rescue return nil
-    return 5
+    sleep 5
     return file_path
   end
 
@@ -106,14 +108,22 @@ def prepare_file(url, as = nil)
   return url
 end
 
+def escape_for_shell(path)
+  escaped = path
+  ' ;&()|^<>?*[]$`"\'{}'.split(//).each{|c|
+    escaped.gsub!(c){ |c| '\\' + c }
+  }
+  escaped
+end
+
 def play(track)
-  $logger.info "track: #{track['title']}"
-  $logger.info "album: #{track['album']}"
-  $logger.info "contributor: #{track['contributor']}"
-  $logger.info "url: #{track['referenceUrl']}"
-  path = prepare_file(track['item'], [track['contributor'], track['title']].map{ |s| s.gsub(/\//, '_')}.join(' - '))
+  $logger.info "playing track"
+  track.each_key{ |key|
+    $logger.info "#{key}: #{track[key]}"
+  }
+  path = prepare_file(track['url'], [track['performer'], track['name']].map{ |s| s.gsub(/\//, '_')}.join(' - '))
   return if $opts[:no_play]
-  cmd = "mplayer #{path}"
+  cmd = "mplayer #{escape_for_shell(path)}"
   cmd += " >& /dev/null" unless $opts[:verbose]
   $logger.debug cmd
   $logger.info "p to play/pause, q to skip, C-c to exit."
@@ -133,16 +143,23 @@ loop {
       next
     end
     index = ($opts[:page] - 1) * $opts[:per_page] + index + 1
-    $logger.info "index: #{index} / #{mixes['total_entries']}"
-    $logger.info "mix: #{mix['name']}"
-    $logger.info "user: #{mix['user']['slug']}"
-    $logger.info "description: #{mix['description']}"
-    $logger.info "url: #{mix['restful_url']}"
-    play json("http://api.8tracks.com/sets/#{set['play_token']}/play.json?mix_id=#{mix['id']}")['track']
+    $logger.info "playing mix #{index} / #{mixes['total_entries']}"
+    mix.each_key{ |key|
+      value = case key
+          when 'cover_urls'
+            mix[key]['original']
+          when 'user'
+            mix[key]['slug']
+          else
+            mix[key]
+          end
+      $logger.info "#{key}: #{value}"
+    }
+    play json("http://api.8tracks.com/sets/#{set['play_token']}/play.json?mix_id=#{mix['id']}")['set']['track']
     loop {
       got = json("http://api.8tracks.com/sets/#{set['play_token']}/next.json?mix_id=#{mix['id']}")
-      break if got['track']['trackId'] == 0
-      play(got['track']) or exit
+      break if got['set']['at_end']
+      play(got['set']['track']) or exit
     }
     if index == mixes['total_entries']
       $opts[:page] = 0

@@ -1,6 +1,10 @@
 module EightTracks::Thing
   attr_accessor :session
 
+  def initialize(data = nil)
+    @data = data
+  end
+
   def logger
     session.logger
   end

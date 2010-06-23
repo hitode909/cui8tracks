@@ -1,8 +1,5 @@
 class EightTracks::Mix
   include EightTracks::Thing
-  def initialize(data)
-    @data = data
-  end
 
   def user
     return @user if @user

@@ -1,9 +1,6 @@
 class EightTracks::Track
   include EightTracks::Thing
   attr_accessor :user
-  def initialize(data)
-    @data = data
-  end
 
   def user
     return @user if @user

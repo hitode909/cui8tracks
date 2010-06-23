@@ -1,8 +1,5 @@
 class EightTracks::User
   include EightTracks::Thing
-  def initialize(data)
-    @data = data
-  end
 
   %w{ toggle_follow follow unfollow}.each{ |method|
     eval <<-EOS

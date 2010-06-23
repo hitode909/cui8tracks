@@ -65,40 +65,54 @@ class EightTracks::Session
     when 'p'
       execute 'pause'
     when 'pause'
-      puts 'pause'
+      logger.info 'pause'
       current_track.pause
     when 'skip'
+      logger.info 'skip'
       current_track.stop
     when 's'
       execute 'skip'
-    when 'toggle_like'
-      p current_mix.toggle_like
-    when 'like'
-      p current_mix.like
-    when 'unlike'
-      p current_mix.unlike
-    when 'toggle_fav'
-      p current_track.toggle_fav
-    when 'fav'
-      p current_track.fav
-    when 'unfav'
-      p current_track.unfav
-    when 'toggle_follow'
-      p current_mix.user.toggle_follow
-    when 'follow'
-      p current_mix.user.follow
-    when 'unfollow'
-      p current_mix.user.unfollow
     when 'h'
       execute 'help'
     when '?'
       execute 'help'
     when 'help'
-      p %w{ pause skip toggle_like like unlike toggle_fav fav unfav toggle_follow follow unfollow help exit}
+      logger.info %w{ pause skip toggle_like like unlike toggle_fav fav unfav toggle_follow follow unfollow help exit}.inspect
     when 'exit'
       exit
+
+    when 'toggle_like'
+      current_mix.toggle_like
+      logger.info "toggled like mix"
+    when 'like'
+      current_mix.like
+      logger.info "liked mix"
+    when 'unlike'
+      current_mix.unlike
+      logger.info "unliked mix"
+
+    when 'toggle_fav'
+      current_track.toggle_fav
+      logger.info "toggled favorite track"
+    when 'fav'
+      current_track.fav
+      logger.info "favorited track"
+    when 'unfav'
+      current_track.unfav
+      logger.info "unfavorited track"
+
+    when 'toggle_follow'
+      current_mix.user.toggle_follow
+      logger.info "toggled follow user"
+    when 'follow'
+      current_mix.user.follow
+      logger.info "followed user"
+    when 'unfollow'
+      current_mix.user.unfollow
+      logger.info "unfollowed user"
+
     else
-      puts "unknown command: #{command}"
+      logger.info "unknown command: #{command}"
     end
   end
 

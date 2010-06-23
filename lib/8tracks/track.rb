@@ -102,12 +102,10 @@ class EightTracks::Track
     File.unlink(self.cache_path) if File.exist?(self.cache_path)
   end
 
-  # XXX: not working???
   %w{ toggle_fav fav unfav}.each{ |method|
     eval <<-EOS
       def #{method}
-        got = api.post(path('#{method}'))
-        got['track']['faved_by_current_user']
+        api.post(path('#{method}'))
       end
     EOS
   }

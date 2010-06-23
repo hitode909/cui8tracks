@@ -38,12 +38,10 @@ class EightTracks::Mix
     }
   end
 
-  # XXX: not working???
   %w{ toggle_like like unlike}.each{ |method|
     eval <<-EOS
       def #{method}
-        got = api.post(path('#{method}'))
-        got['mix']['liked_by_current_user']
+        api.post(path('#{method}'))
       end
     EOS
   }

@@ -94,7 +94,9 @@ class EightTracks::Session
     when '?'
       execute 'help'
     when 'help'
-      p %w{ pause skip toggle_like like unlike toggle_fav fav unfav toggle_follow follow unfollow help}
+      p %w{ pause skip toggle_like like unlike toggle_fav fav unfav toggle_follow follow unfollow help exit}
+    when 'exit'
+      exit
     else
       puts "unknown command: #{command}"
     end

@@ -32,6 +32,7 @@ class EightTracks::API
       end
     end
     json_data = JSON.parse(res.body)
+    logger.debug json_data.inspect
     case res.code
     when '200'
       json_data

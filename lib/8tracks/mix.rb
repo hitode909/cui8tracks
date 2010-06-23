@@ -1,6 +1,5 @@
 class EightTracks::Mix
   include EightTracks::Thing
-  attr_accessor :set
   def initialize(data)
     @data = data
   end
@@ -26,12 +25,16 @@ class EightTracks::Mix
   end
 
   def each_track(&block)
-    got = @api.get("/sets/#{set.play_token}/play", {:mix_id => self.id})
-    yield EightTracks::Track.new(got['set']['track'])
+    got = api.get("/sets/#{set.play_token}/play", {:mix_id => self.id})
+    track = EightTracks::Track.new(got['set']['track'])
+    track.session = self.session
+    yield track
     loop {
-      got = @api.get("/sets/#{set.play_token}/next", {:mix_id => self.id})
+      got = api.get("/sets/#{set.play_token}/next", {:mix_id => self.id})
       break if got['set']['at_end']
-      yield EightTracks::Track.new(got['set']['track'])
+      track = EightTracks::Track.new(got['set']['track'])
+      track.session = self.session
+      yield track
     }
   end
 end

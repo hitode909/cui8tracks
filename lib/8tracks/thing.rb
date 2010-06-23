@@ -1,9 +1,16 @@
 module EightTracks::Thing
+  attr_accessor :session
+
   def logger
-    return @logger if @logger
-    @logger = Logger.new STDOUT
-    @logger.level = Logger::DEBUG
-    @logger
+    session.logger
+  end
+
+  def api
+    session.api
+  end
+
+  def set
+    session.set
   end
 
   def method_missing(name, *args, &block)
@@ -17,8 +24,6 @@ module EightTracks::Thing
   def data
     @data
   end
-
-  attr_accessor :api
 
   def info(data = self.data)
     data.each_key{ |key|

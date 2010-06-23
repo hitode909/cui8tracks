@@ -13,21 +13,13 @@ $:.unshift(File.dirname(self_file) + "/lib")
 require '8tracks'
 require 'pp'
 
-pit = Pit.get('8tracks_api', :require => {
+pit = Pit.get('8tracks_api_v2', :require => {
     'username' => 'username',
     'password' => 'password',
   })
-api = EightTracks::API.new(pit['username'], pit['password'])
 
-set = EightTracks::Set.new(api)
 
-set.tag = 'house'               # should parse argv.
-
-set.info
-set.each_mix{ |mix|
-  mix.info
-  mix.each_track{ |track|
-    track.info
-    track.play
-  }
-}
+session = EightTracks::Session.new
+session.load_config(ARGV)
+session.authorize(pit['username'], pit['password'])
+session.play

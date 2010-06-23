@@ -13,11 +13,21 @@ class EightTracks::Track
   end
 
   def play
-    Thread.new{ self.download } unless self.has_cache?
-    logger.info "cache hit" if self.has_cache?
+    if self.has_cache?
+      logger.info "cache hit" if self.has_cache?
+    else
+      if session.config[:no_play]
+        self.download
+      else
+        Thread.new {
+          self.download
+        }
+      end
+    end
+    return true if session.config[:no_play]
     path = self.has_cache? ? self.cache_path : self.url
     cmd = "mplayer #{escape_for_shell(path)}"
-    cmd += " >& /dev/null"
+    cmd += " >& /dev/null" unless session.config[:verbose]
     logger.debug cmd
     logger.info "p to play/pause, q to skip, C-c to exit."
     system(cmd) or return nil

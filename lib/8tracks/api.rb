@@ -5,7 +5,6 @@ class EightTracks::API
     @username = username
     @password = password
     @logged_in = false
-    login
   end
 
   def login
@@ -21,6 +20,7 @@ class EightTracks::API
 
   def http_request(klass, path, param = { })
     path += '.json' unless path  =~ /\.json$/
+    logger.debug "#{klass.to_s.split(/::/).last} #{path} #{param.inspect}"
     req = klass.new(path)
     req.basic_auth(@username, @password) if @logged_in
     param_str = to_param_str(param)
@@ -36,6 +36,7 @@ class EightTracks::API
     when '200'
       json_data
     else
+      # XXX
       pp res
       raise 'api'
     end

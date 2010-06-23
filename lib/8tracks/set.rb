@@ -1,8 +1,8 @@
 class EightTracks::Set
   include EightTracks::Thing
   attr_accessor :per_page, :page, :sort, :user, :q, :tag
-  def initialize(api)
-    @api = api
+  def initialize
+    # default config
     @per_page = 2
     @page = 1
     @sort = 'recent'
@@ -12,15 +12,18 @@ class EightTracks::Set
     super(self.query)
   end
 
+  # to access session.set.play_token
   def data
-    @data ||= @api.get('/sets/new')
+    @data ||= api.get('/sets/new')
   end
 
+  attr_reader :total_entries
   def mixes
-    @api.get(path, query)['mixes'].map{|mix_data|
+    got = api.get(path, query)
+    @total_entries = got['total_entries']
+    got['mixes'].map{|mix_data|
       mix = EightTracks::Mix.new(mix_data)
-      mix.api = @api
-      mix.set = self
+      mix.session = self.session
       mix
     }
   end

@@ -16,4 +16,5 @@ module EightTracks
   require '8tracks/session'
   require '8tracks/set'
   require '8tracks/track'
+  require '8tracks/user'
 end

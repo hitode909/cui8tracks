@@ -30,4 +30,16 @@ module EightTracks::Thing
       logger.info "#{self.class.to_s}::#{key} = #{data[key]}"
     }
   end
+
+  def id
+    @data['id']
+  end
+
+  def path(method = '')
+    classname = self.class.to_s.split(/::/).last.downcase
+    classname += 'e' if classname =~ /x$/
+    classname += 's'
+    "/#{classname}/#{self.id}/" + method
+  end
+
 end

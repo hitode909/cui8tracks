@@ -60,28 +60,60 @@ class EightTracks::Session
     }
   end
 
+  def execute(command)
+    case command
+    when 'p'
+      execute 'pause'
+    when 'pause'
+      puts 'pause'
+      current_track.pause
+    when 'skip'
+      current_track.stop
+    when 's'
+      execute 'skip'
+    when 'toggle_like'
+      p current_mix.toggle_like
+    when 'like'
+      p current_mix.like
+    when 'unlike'
+      p current_mix.unlike
+    when 'toggle_fav'
+      p current_track.toggle_fav
+    when 'fav'
+      p current_track.fav
+    when 'unfav'
+      p current_track.unfav
+    when 'toggle_follow'
+      p current_mix.user.toggle_follow
+    when 'follow'
+      p current_mix.user.follow
+    when 'unfollow'
+      p current_mix.user.unfollow
+    when 'h'
+      execute 'help'
+    when '?'
+      execute 'help'
+    when 'help'
+      p %w{ pause skip toggle_like like unlike toggle_fav fav unfav toggle_follow follow unfollow help}
+    else
+      puts "unknown command: #{command}"
+    end
+  end
+
   def start_input_thread
     # XXX: very poor
     Thread.new {
-      while line = STDIN.gets
-        case line.chomp
-        when 'p'
-          puts 'pause'
-          current_track.pause
-        when 's'
-          puts 'skip'
-          current_track.stop
-        when 'ft'
-          puts 'fav track'
-        when 'fm'
-          puts 'fav mix'
-        when 'fu'
-          puts 'fav user'
-        when /^(\?|h|help)$/
-          puts 'help'
-        else
-          puts 'unknown command'
+      begin
+        print '> '
+        STDOUT.flush
+        while line = STDIN.gets
+          execute line.chomp
+          print '> '
+          STDOUT.flush
         end
+      rescue => e
+        p e
+        puts e.backtrace.join("\n")
       end
     }
   end

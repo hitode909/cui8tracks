@@ -13,7 +13,7 @@ class EightTracks::API
     @logged_in = true if res['logged_in']
   end
 
-  def to_param_str(hash)
+  def to_param_str(hash = { })
     raise ArgumentError, 'Argument must be a Hash object' unless hash.is_a?(Hash)
     hash.to_a.map{|i| i[0].to_s + '=' + CGI.escape(i[1].to_s) }.join('&')
   end

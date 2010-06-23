@@ -4,6 +4,13 @@ class EightTracks::Mix
     @data = data
   end
 
+  def user
+    return @user if @user
+    @user = EightTracks::User.new(@data['user'])
+    @user.session = self.session
+    @user
+  end
+
   def info
     %w{ name description user tag_list_cache restful_url plays_count liked_by_current_user}.each{ |key|
       value = case key
@@ -33,4 +40,14 @@ class EightTracks::Mix
       yield track
     }
   end
+
+  # XXX: not working???
+  %w{ toggle_like like unlike}.each{ |method|
+    eval <<-EOS
+      def #{method}
+        got = api.post(path('#{method}'))
+        got['mix']['liked_by_current_user']
+      end
+    EOS
+  }
 end

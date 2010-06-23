@@ -35,7 +35,7 @@ class EightTracks::Track
   end
 
   def cache_path
-    'cache/' + self.url.gsub(File.extname(url), '').gsub(/[^\w]/, '_') + File.extname(url)
+    'cache/' + [self.performer, self.name].join(' - ').map{ |s| s.gsub(/\//, '_')}.join(' - ') + File.extname(url)
   end
 
   def has_cache?

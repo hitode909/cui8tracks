@@ -5,19 +5,15 @@ class EightTracks::Mix
   end
 
   def info
-    to_print = { }
-    self.data.each_key{ |key|
+    %w{ name description user tag_list_cache restful_url plays_count liked_by_current_user}.each{ |key|
       value = case key
-              when 'cover_urls'
-                self.data[key]['original']
               when 'user'
-                self.data[key]['slug']
+                data[key]['slug']
               else
-                self.data[key]
+                data[key]
               end
-      to_print[key] = value
+      super(key => value)
     }
-    super(to_print)
   end
 
   def id

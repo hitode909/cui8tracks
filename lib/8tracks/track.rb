@@ -4,6 +4,12 @@ class EightTracks::Track
     @data = data
   end
 
+  def info
+    %w{ performer name release_name year url faved_by_current_user}.each{ |key|
+      super(key => data[key])
+    }
+  end
+
   def escape_for_shell(path)
     escaped = path
     ' ;&()|^<>?*[]$`"\'{}'.split(//).each{|c|

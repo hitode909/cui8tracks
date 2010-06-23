@@ -22,4 +22,5 @@ pit = Pit.get('8tracks_api_v2', :require => {
 session = EightTracks::Session.new
 session.load_config(ARGV)
 session.authorize(pit['username'], pit['password'])
+session.start_input_thread
 session.play

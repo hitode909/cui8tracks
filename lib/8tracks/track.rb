@@ -32,12 +32,36 @@ class EightTracks::Track
     end
     return true if session.config[:no_play]
     path = self.has_cache? ? self.cache_path : self.url
-    cmd = "mplayer #{escape_for_shell(path)}"
-    cmd += " >& /dev/null" unless session.config[:verbose]
+
+    cmd = "mplayer #{escape_for_shell(path)} 2> /dev/null"
     logger.debug cmd
-    logger.info "p to play/pause, q to skip, C-c to exit."
-    system(cmd) or return nil
-    return true
+    @io = IO.popen(cmd, 'r+')
+    Thread.new {
+      begin
+        loop {
+          s = @io.read 1
+          print s if s && session.config[:verbose]
+          break if s.nil?
+          break if @io.closed?
+        }
+      ensure
+        @playing = false
+      end
+    }
+    @playing = true
+  end
+
+  def playing?
+    @playing ||= false
+  end
+
+  def pause
+    @io.write 'p'
+  end
+
+  def stop
+    @io.write 'q'
+    @playing = false
   end
 
   def cache_path

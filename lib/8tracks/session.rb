@@ -1,5 +1,5 @@
 class EightTracks::Session
-  attr_accessor :api, :config, :set
+  attr_accessor :api, :config, :set, :current_track, :current_mix
 
   def logger
     return @logger if @logger
@@ -43,15 +43,46 @@ class EightTracks::Session
     }
     current = 0
     set.each_mix{ |mix|
+      @current_mix = mix
       current += 1
       next if (config[:play_from] || 0) > current
       logger.info "Playing mix #{current} / #{set.total_entries}"
       mix.info
       mix.each_track{ |track|
+        @current_track = track
         logger.info "Playing track"
         track.info
         track.play
+        while track.playing?
+          sleep 1
+        end
       }
+    }
+  end
+
+  def start_input_thread
+    # XXX: very poor
+    Thread.new {
+      while line = STDIN.gets
+        case line.chomp
+        when 'p'
+          puts 'pause'
+          current_track.pause
+        when 's'
+          puts 'skip'
+          current_track.stop
+        when 'ft'
+          puts 'fav track'
+        when 'fm'
+          puts 'fav mix'
+        when 'fu'
+          puts 'fav user'
+        when /^(\?|h|help)$/
+          puts 'help'
+        else
+          puts 'unknown command'
+        end
+      end
     }
   end
 end

@@ -60,6 +60,10 @@ class EightTracks::Session
     }
   end
 
+  def avail_commands
+    %w{ pause skip toggle_like like unlike toggle_fav fav unfav toggle_follow follow unfollow help exit}
+  end
+
   def execute(command)
     case command
     when 'p'
@@ -77,7 +81,8 @@ class EightTracks::Session
     when '?'
       execute 'help'
     when 'help'
-      logger.info %w{ pause skip toggle_like like unlike toggle_fav fav unfav toggle_follow follow unfollow help exit}.inspect
+      logger.info "available commands:"
+      logger.info avail_commands
     when 'exit'
       exit
 
@@ -113,23 +118,26 @@ class EightTracks::Session
 
     else
       logger.info "unknown command: #{command}"
+      execute 'help'
     end
   end
 
   def start_input_thread
-    # XXX: very poor
+    Readline.completion_proc = lambda {|input|
+      avail_commands.grep(/\A#{Regexp.quote input}/)
+    }
     Thread.new {
-      begin
-        print '> '
-        STDOUT.flush
-        while line = STDIN.gets
+      while line = Readline.readline('> ')
+        begin
+          if line.empty?
+            Readline::HISTORY.pop
+            next
+          end
           execute line.chomp
-          print '> '
-          STDOUT.flush
+        rescue => e
+          logger.error "#{e.class}, #{e.message}"
+          puts e.backtrace.join("\n")
         end
-      rescue => e
-        p e
-        puts e.backtrace.join("\n")
       end
     }
   end

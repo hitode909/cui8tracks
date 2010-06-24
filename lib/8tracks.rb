@@ -8,6 +8,7 @@ require 'net/http'
 require 'pp'
 require 'json'
 require 'cgi'
+require 'readline'
 
 module EightTracks
   require '8tracks/thing'

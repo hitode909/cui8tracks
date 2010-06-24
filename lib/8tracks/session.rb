@@ -4,7 +4,7 @@ class EightTracks::Session
   def logger
     return @logger if @logger
     @logger = Logger.new STDOUT
-    @logger.level = Logger::DEBUG if self.config[:debug]
+    @logger.level = self.config[:debug] ? Logger::DEBUG : Logger::INFO
     @logger
   end
 

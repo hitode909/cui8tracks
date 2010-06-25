@@ -9,6 +9,7 @@ require 'pp'
 require 'json'
 require 'cgi'
 require 'readline'
+require 'ruby-growl'
 
 module EightTracks
   require '8tracks/thing'

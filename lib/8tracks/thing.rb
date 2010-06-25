@@ -46,4 +46,10 @@ module EightTracks::Thing
     "/#{classname}/#{self.id}/" + method
   end
 
+  def notify(title, message)
+     Thread.new {
+      @@notifier = Growl.new 'localhost', 'ruby', ['notify']
+      @@notifier.notify 'notify', title, message
+    }
+  end
 end

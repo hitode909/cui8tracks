@@ -123,17 +123,18 @@ class EightTracks::Session
   end
 
   def start_input_thread
-    Readline.completion_proc = lambda {|input|
-      avail_commands.grep(/\A#{Regexp.quote input}/)
-    }
     Thread.new {
+      Readline.completion_proc = lambda {|input|
+        avail_commands.grep(/\A#{Regexp.quote input}/)
+      }
       while line = Readline.readline('> ')
         begin
+          line = line.chomp.strip rescue ''
           if line.empty?
             Readline::HISTORY.pop
             next
           end
-          execute line.chomp
+          execute line
         rescue => e
           logger.error "#{e.class}, #{e.message}"
           puts e.backtrace.join("\n")

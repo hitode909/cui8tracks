@@ -1,6 +1,6 @@
 class EightTracks::Track
   include EightTracks::Thing
-  attr_accessor :user
+  attr_accessor :user, :mix
 
   def user
     return @user if @user
@@ -12,6 +12,7 @@ class EightTracks::Track
     %w{ performer name release_name year url faved_by_current_user}.each{ |key|
       super(key => data[key])
     }
+    notify self.name, [self.performer, self.release_name].join("\n")
   end
 
   def escape_for_shell(path)
@@ -23,6 +24,7 @@ class EightTracks::Track
   end
 
   def play
+    @playing = true
     if self.has_cache?
       logger.info "cache hit" if self.has_cache?
     else
@@ -52,11 +54,10 @@ class EightTracks::Track
         @playing = false
       end
     }
-    @playing = true
   end
 
   def playing?
-    @playing ||= false
+    @playing
   end
 
   def pause
@@ -64,8 +65,9 @@ class EightTracks::Track
   end
 
   def stop
-    @io.write 'q'
     @playing = false
+    return if @io.closed?
+    @io.write 'q'
   end
 
   def cache_path

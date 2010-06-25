@@ -18,6 +18,7 @@ class EightTracks::Mix
               end
       super(key => value)
     }
+    notify self.name, self.description
   end
 
   def id
@@ -28,6 +29,7 @@ class EightTracks::Mix
     got = api.get("/sets/#{set.play_token}/play", {:mix_id => self.id})
     track = EightTracks::Track.new(got['set']['track'])
     track.session = self.session
+    track.mix = self
     yield track
     loop {
       got = api.get("/sets/#{set.play_token}/next", {:mix_id => self.id})

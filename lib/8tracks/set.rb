@@ -38,7 +38,7 @@ class EightTracks::Set
   end
 
   def path
-    @user ? "/users/#{@user}/mix_feed" : "/mixes"
+    @user ? "/users/#{@user}/mixes" : "/mixes"
   end
 
   def query

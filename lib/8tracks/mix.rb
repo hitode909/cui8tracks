@@ -28,16 +28,25 @@ class EightTracks::Mix
   def each_track(&block)
     got = api.get("/sets/#{set.play_token}/play", {:mix_id => self.id})
     track = EightTracks::Track.new(got['set']['track'])
+    @track = track
     track.session = self.session
     track.mix = self
     yield track
+    return if @skipped
     loop {
       got = api.get("/sets/#{set.play_token}/next", {:mix_id => self.id})
       break if got['set']['at_end']
       track = EightTracks::Track.new(got['set']['track'])
+      @track = track
       track.session = self.session
       yield track
+      return if @skipped
     }
+  end
+
+  def skip
+    @skipped = true
+    @track.stop
   end
 
   %w{ toggle_like like unlike}.each{ |method|

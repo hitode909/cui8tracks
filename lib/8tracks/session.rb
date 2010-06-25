@@ -61,7 +61,7 @@ class EightTracks::Session
   end
 
   def avail_commands
-    %w{ pause skip toggle_like like unlike toggle_fav fav unfav toggle_follow follow unfollow open help exit}
+    %w{ pause skip skip_mix toggle_like like unlike toggle_fav fav unfav toggle_follow follow unfollow open help exit}
   end
 
   def execute(command)
@@ -72,8 +72,11 @@ class EightTracks::Session
       logger.info 'pause'
       current_track.pause
     when 'skip'
-      logger.info 'skip'
+      logger.info 'skip track'
       current_track.stop
+    when 'skip_mix'
+      logger.info 'skip mix'
+      current_mix.skip
     when 's'
       execute 'skip'
     when 'h'

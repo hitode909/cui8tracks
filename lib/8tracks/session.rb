@@ -61,7 +61,7 @@ class EightTracks::Session
   end
 
   def avail_commands
-    %w{ pause skip toggle_like like unlike toggle_fav fav unfav toggle_follow follow unfollow help exit}
+    %w{ pause skip toggle_like like unlike toggle_fav fav unfav toggle_follow follow unfollow open help exit}
   end
 
   def execute(command)
@@ -116,6 +116,9 @@ class EightTracks::Session
       current_mix.user.unfollow
       logger.info "unfollowed user"
 
+    when 'open'
+      logger.info "open current mix"
+      system "open #{current_mix.restful_url}"
     else
       logger.info "unknown command: #{command}"
       execute 'help'

@@ -24,7 +24,8 @@ class EightTracks::API
     req = klass.new(path)
     req.basic_auth(@username, @password) if @logged_in
     param_str = to_param_str(param)
-    res = Net::HTTP.start('8tracks.com', 80) do |http|
+    proxy_host, proxy_port = (ENV["http_proxy"] || ENV["HTTP_PROXY"] || '').sub(/http:\/\//, '').split(':')
+    res = Net::HTTP::Proxy(proxy_host, proxy_port).start('8tracks.com', 80) do |http|
       if param_str
         http.request(req, param_str)
       else

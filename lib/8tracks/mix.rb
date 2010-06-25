@@ -18,7 +18,7 @@ class EightTracks::Mix
               end
       super(key => value)
     }
-    notify self.name, self.description
+    notify "Playing mix #{self.name}", self.description
   end
 
   def id

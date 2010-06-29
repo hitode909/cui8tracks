@@ -87,6 +87,7 @@ class EightTracks::Session
       logger.info "available commands:"
       logger.info avail_commands
     when 'exit'
+      current_track.stop
       exit
 
     when 'toggle_like'

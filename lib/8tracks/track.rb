@@ -39,7 +39,7 @@ class EightTracks::Track
     return true if session.config[:no_play]
     path = self.has_cache? ? self.cache_path : self.url
 
-    cmd = "mplayer #{escape_for_shell(path)} 2> /dev/null"
+    cmd = "mplayer #{escape_for_shell(path)} #{session.config[:verbose] ? "" : "-really-quiet"} 2> /dev/null"
     logger.debug cmd
     @io = IO.popen(cmd, 'r+')
     Thread.new {

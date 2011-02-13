@@ -86,14 +86,18 @@ class EightTracks::Track
 
     logger.info "downloading #{self.url}"
     total = nil
+    from = Time.now
     open(self.cache_path, 'w') {|local|
       got = open(url,
         :content_length_proc => proc{|_total|
           total = _total
         },
         :progress_proc => proc{ |now|
-          print "%3d%% #{now}/#{total}\r" % (now/total.to_f*100)
-          $stdout.flush
+          if Time.now - from > 0.2
+            from = Time.now
+            print "%3d%% #{now}/#{total}\r" % (now/total.to_f*100)
+            $stdout.flush
+          end
         }
         ) {|remote|
         local.write(remote.read)

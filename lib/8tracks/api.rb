@@ -9,7 +9,7 @@ class EightTracks::API
 
   def login
     return if @logged_in
-    res = post('/sessions', :login => @username, :password => @password)
+    res = post('/sessions', :login => @username, :password => @password, :https => true)
     @logged_in = true if res['logged_in']
   end
 
@@ -23,9 +23,12 @@ class EightTracks::API
     logger.debug "#{klass.to_s.split(/::/).last} #{path} #{param.inspect}"
     req = klass.new(path)
     req.basic_auth(@username, @password) if @logged_in
+    port = param.delete(:https) ? 443 : 80 # XXX
     param_str = to_param_str(param)
     proxy_host, proxy_port = (ENV["http_proxy"] || ENV["HTTP_PROXY"] || '').sub(/http:\/\//, '').split(':')
-    res = Net::HTTP::Proxy(proxy_host, proxy_port).start('8tracks.com', 80) do |http|
+    connection = Net::HTTP::Proxy(proxy_host, proxy_port).new('8tracks.com', port)
+    connection.use_ssl = true if port == 443
+    res = connection.start do |http|
       if param_str
         http.request(req, param_str)
       else

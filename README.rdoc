@@ -1,6 +1,6 @@
 = cui8tracks
 
-cui 8tracks player
+8tracks player on terminal
 
 == How to Use
 

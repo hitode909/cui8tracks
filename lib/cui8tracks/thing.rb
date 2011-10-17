@@ -1,4 +1,4 @@
-module EightTracks::Thing
+module CUI8Tracks::Thing
   attr_accessor :session
 
   def initialize(data = nil)
@@ -47,9 +47,10 @@ module EightTracks::Thing
   end
 
   def notify(title, message)
-     Thread.new {
-      @@notifier = Growl.new 'localhost', 'ruby', ['notify']
-      @@notifier.notify 'notify', title, message
-    }
+    Notify.notify(title, message)
+    # Thread.new {
+    #   @@notifier = Growl.new 'localhost', 'ruby', ['notify']
+    #   @@notifier.notify 'notify', title, message
+    # }
   end
 end

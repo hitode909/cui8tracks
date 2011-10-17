@@ -1,5 +1,5 @@
-class EightTracks::API
-  include EightTracks::Thing
+class CUI8Tracks::API
+  include CUI8Tracks::Thing
 
   API_KEY = '3bed6bc564136c299324e205ffaf3fa1b44f094e'
 

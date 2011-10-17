@@ -1,10 +1,10 @@
-class EightTracks::Track
-  include EightTracks::Thing
+class CUI8Tracks::Track
+  include CUI8Tracks::Thing
   attr_accessor :user, :mix
 
   def user
     return @user if @user
-    @user = EightTracks::User.new(@data['user'])
+    @user = CUI8Tracks::User.new(@data['user'])
     @user.session = self.session
   end
 

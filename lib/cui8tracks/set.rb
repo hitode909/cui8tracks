@@ -1,5 +1,5 @@
-class EightTracks::Set
-  include EightTracks::Thing
+class CUI8Tracks::Set
+  include CUI8Tracks::Thing
   attr_accessor :per_page, :page, :sort, :user, :q, :tag
   def initialize
     # default config
@@ -22,7 +22,7 @@ class EightTracks::Set
     got = api.get(path, query)
     @total_entries = got['total_entries']
     got['mixes'].map{|mix_data|
-      mix = EightTracks::Mix.new(mix_data)
+      mix = CUI8Tracks::Mix.new(mix_data)
       mix.session = self.session
       mix
     }

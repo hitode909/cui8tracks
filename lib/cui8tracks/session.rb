@@ -1,4 +1,4 @@
-class EightTracks::Session
+class CUI8Tracks::Session
   attr_accessor :api, :config, :set, :current_track, :current_mix
 
   def logger
@@ -30,13 +30,13 @@ class EightTracks::Session
 
   def authorize(username, password)
     raise 'config sesms not loaded.' unless config
-    @api = EightTracks::API.new(username, password)
+    @api = CUI8Tracks::API.new(username, password)
     @api.session = self
     @api.login
   end
 
   def play
-    @set = set = EightTracks::Set.new
+    @set = set = CUI8Tracks::Set.new
     set.session = self
     %w{q tag user sort}.each{ |key|
       set.instance_variable_set('@' + key, config[key.to_sym])

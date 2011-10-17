@@ -1,9 +1,9 @@
-class EightTracks::Mix
-  include EightTracks::Thing
+class CUI8Tracks::Mix
+  include CUI8Tracks::Thing
 
   def user
     return @user if @user
-    @user = EightTracks::User.new(@data['user'])
+    @user = CUI8Tracks::User.new(@data['user'])
     @user.session = self.session
     @user
   end
@@ -27,7 +27,7 @@ class EightTracks::Mix
 
   def each_track(&block)
     got = api.get("/sets/#{set.play_token}/play", {:mix_id => self.id})
-    track = EightTracks::Track.new(got['set']['track'])
+    track = CUI8Tracks::Track.new(got['set']['track'])
     @track = track
     track.session = self.session
     track.mix = self
@@ -36,7 +36,7 @@ class EightTracks::Mix
     loop {
       got = api.get("/sets/#{set.play_token}/next", {:mix_id => self.id})
       break if got['set']['at_end']
-      track = EightTracks::Track.new(got['set']['track'])
+      track = CUI8Tracks::Track.new(got['set']['track'])
       @track = track
       track.session = self.session
       yield track

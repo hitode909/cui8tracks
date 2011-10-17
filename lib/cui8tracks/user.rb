@@ -1,5 +1,5 @@
-class EightTracks::User
-  include EightTracks::Thing
+class CUI8Tracks::User
+  include CUI8Tracks::Thing
 
   %w{ toggle_follow follow unfollow}.each{ |method|
     eval <<-EOS

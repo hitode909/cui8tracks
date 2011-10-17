@@ -5,7 +5,7 @@ class EightTracks::Set
     # default config
     @per_page = 2
     @page = 1
-    @sort = 'recent'
+    @sort = 'hot'
   end
 
   def info

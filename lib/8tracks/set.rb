@@ -3,7 +3,7 @@ class EightTracks::Set
   attr_accessor :per_page, :page, :sort, :user, :q, :tag
   def initialize
     # default config
-    @per_page = 2
+    @per_page = 1
     @page = 1
     @sort = 'hot'
   end
@@ -30,7 +30,10 @@ class EightTracks::Set
 
   def each_mix(&block)
     loop {
-      mixes.each{ |mix|
+      current_mixes = mixes
+      return if current_mixes.empty?
+
+      current_mixes.each{ |mix|
         yield mix
       }
       @page += 1

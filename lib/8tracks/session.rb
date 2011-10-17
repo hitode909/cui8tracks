@@ -10,7 +10,7 @@ class EightTracks::Session
 
   def load_config(argv)
     opt = OptionParser.new
-    @config = {:per_page => 2, :page => 1 }
+    @config = {:per_page => 1, :page => 1 }
 
     OptionParser.new {|opt|
       opt.on('-q QUERY', '--query') {|v| @config[:q] = v}
@@ -41,12 +41,12 @@ class EightTracks::Session
     %w{q tag user sort}.each{ |key|
       set.instance_variable_set('@' + key, config[key.to_sym])
     }
-    current = 0
+    if config[:play_from]
+      set.page = config[:play_from]
+    end
     set.each_mix{ |mix|
       @current_mix = mix
-      current += 1
-      next if (config[:play_from] || 0) > current
-      logger.info "Playing mix #{current} / #{set.total_entries}"
+      logger.info "Playing mix #{set.page} / #{set.total_entries}"
       mix.info
       mix.each_track{ |track|
         @current_track = track

@@ -15,8 +15,8 @@ Jeweler::Tasks.new do |gem|
   gem.name = "cui8tracks"
   gem.homepage = "http://github.com/hitode909/cui8tracks"
   gem.license = "MIT"
-  gem.summary = %Q{TODO: one-line summary of your gem}
-  gem.description = %Q{TODO: longer description of your gem}
+  gem.summary = %Q{cui 8tracks player}
+  gem.description = %Q{cui8tracks is CUI 8tracks player for terminal}
   gem.email = "hitode909@gmail.com"
   gem.authors = ["hitode909"]
   # Include your dependencies below. Runtime dependencies are required when using your gem,

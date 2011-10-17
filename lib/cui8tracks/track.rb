@@ -70,8 +70,12 @@ class CUI8Tracks::Track
     @io.write 'q'
   end
 
+  def cache_directory
+    File.join Dir.tmpdir, 'cui8tracks-cache',
+  end
+
   def cache_path
-    'cache/' + [self.performer, self.name].map{ |s| s.gsub(/\//, '_')}.join(' - ') + File.extname(url)
+    File.join cache_directory, [self.performer, self.name].map{ |s| s.gsub(/\//, '_')}.join(' - ') + File.extname(url)
   end
 
   def has_cache?
@@ -79,9 +83,9 @@ class CUI8Tracks::Track
   end
 
   def download
-    unless File.directory?('cache')
+    unless File.directory?(cache_directory)
       logger.debug('make cache directory')
-      Dir.mkdir('cache')
+      Dir.mkdir(cache_directory)
     end
 
     logger.info "downloading #{self.url}"

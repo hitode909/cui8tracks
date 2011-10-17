@@ -7,6 +7,7 @@ require 'pp'
 require 'json'
 require 'cgi'
 require 'readline'
+require 'tmpdir'
 
 require 'pit'
 require 'notify'

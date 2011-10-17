@@ -16,7 +16,7 @@ class EightTracks::Session
       opt.on('-q QUERY', '--query') {|v| @config[:q] = v}
       opt.on('-t TAG', '--tag')   {|v| @config[:tag] = v}
       opt.on('-u USER', '--user')  {|v| @config[:user] = v}
-      opt.on('-s SORT', '--sort', '[recent|popular|random]')  {|v| @config[:sort] = v}
+      opt.on('-s SORT', '--sort', '[recent|hot|popular|random]')  {|v| @config[:sort] = v}
       opt.on('--no-play', "don't play tracks")  {|v| @config[:no_play] = true}
       opt.on('--play_from FROM', 'play from [FROM]th mix')  {|v| @config[:play_from] = v.to_i}
       opt.on('--verbose', 'print mplayer output')  {|v| @config[:verbose] = v}

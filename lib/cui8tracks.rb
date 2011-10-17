@@ -20,4 +20,5 @@ module CUI8Tracks
   require 'cui8tracks/set'
   require 'cui8tracks/track'
   require 'cui8tracks/user'
+  require 'cui8tracks/banner'
 end

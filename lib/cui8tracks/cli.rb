@@ -2,6 +2,8 @@ module CUI8Tracks
   class CLI
     def self.execute(stdout, arguments=[])
 
+      puts CUI8Tracks::BANNER
+
       pit = Pit.get('8tracks_login', :require => {
           'username' => 'username',
           'password' => 'password',

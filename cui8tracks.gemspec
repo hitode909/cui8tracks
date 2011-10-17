@@ -5,12 +5,12 @@
 
 Gem::Specification.new do |s|
   s.name = %q{cui8tracks}
-  s.version = "0.2.1"
+  s.version = "0.2.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = [%q{hitode909}]
   s.date = %q{2011-10-17}
-  s.description = %q{cui8tracks is CUI 8tracks player for terminal}
+  s.description = %q{8tracks player on terminal}
   s.email = %q{hitode909@gmail.com}
   s.executables = [%q{cui8tracks}]
   s.extra_rdoc_files = [
@@ -43,7 +43,7 @@ Gem::Specification.new do |s|
   s.licenses = [%q{MIT}]
   s.require_paths = [%q{lib}]
   s.rubygems_version = %q{1.8.6}
-  s.summary = %q{cui 8tracks player}
+  s.summary = %q{8tracks player}
   s.test_files = [
     "spec/cui8tracks_spec.rb",
     "spec/spec_helper.rb"

@@ -1,6 +1,8 @@
 class EightTracks::API
   include EightTracks::Thing
 
+  API_KEY = '3bed6bc564136c299324e205ffaf3fa1b44f094e'
+
   def initialize(username, password)
     @username = username
     @password = password
@@ -23,6 +25,7 @@ class EightTracks::API
     logger.debug "#{klass.to_s.split(/::/).last} #{path} #{param.inspect}"
     req = klass.new(path)
     req.basic_auth(@username, @password) if @logged_in
+    param[:api_key] = API_KEY
     port = param.delete(:https) ? 443 : 80 # XXX
     param_str = to_param_str(param)
     proxy_host, proxy_port = (ENV["http_proxy"] || ENV["HTTP_PROXY"] || '').sub(/http:\/\//, '').split(':')

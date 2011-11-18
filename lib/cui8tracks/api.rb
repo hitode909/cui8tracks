@@ -23,16 +23,16 @@ class CUI8Tracks::API
   def http_request(klass, path, param = { })
     path += '.json' unless path  =~ /\.json$/
     logger.debug "#{klass.to_s.split(/::/).last} #{path} #{param.inspect}"
-    req = klass.new(path)
-    req.basic_auth(@username, @password) if @logged_in
     param[:api_key] = API_KEY
     port = param.delete(:https) ? 443 : 80 # XXX
     param_str = to_param_str(param)
+    req = klass == Net::HTTP::Post ? klass.new(path) : klass.new(path + '?' + param_str)
+    req.basic_auth(@username, @password) if @logged_in
     proxy_host, proxy_port = (ENV["http_proxy"] || ENV["HTTP_PROXY"] || '').sub(/http:\/\//, '').split(':')
     connection = Net::HTTP::Proxy(proxy_host, proxy_port).new('8tracks.com', port)
     connection.use_ssl = true if port == 443
     res = connection.start do |http|
-      if param_str
+      if req.kind_of? Net::HTTP::Post
         http.request(req, param_str)
       else
         http.request(req)

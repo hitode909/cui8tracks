@@ -71,7 +71,7 @@ class CUI8Tracks::Track
   end
 
   def cache_directory
-    File.join Dir.tmpdir, 'cui8tracks-cache',
+    File.join Dir.tmpdir, 'cui8tracks-cache'
   end
 
   def cache_path

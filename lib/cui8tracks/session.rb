@@ -25,7 +25,7 @@ class CUI8Tracks::Session
     }
     logger.debug @config
 
-    system 'mplayer >& /dev/null' or raise 'mplayer seems not installed'
+    system 'mplayer > /dev/null' or raise 'mplayer seems not installed'
   end
 
   def authorize(username, password)

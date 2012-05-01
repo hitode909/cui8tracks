@@ -2,6 +2,16 @@
 
 8tracks player on terminal
 
+== Prepare
+    cui8tracks uses 'pit' to login to 8tracks. Pit starts your $EDITOR to ask for your creentials
+    so make sure you have set your EDITOR with:
+
+    echo $EDITOR
+    
+    $ export EDITOR=vim
+
+    replace vim with your favorited editor
+
 == How to Use
 
     cui8tracks.rb

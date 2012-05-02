@@ -46,11 +46,10 @@ class CUI8Tracks::Session
     end
     set.each_mix{ |mix|
       @current_mix = mix
-      logger.info "Playing mix #{set.page} / #{set.total_entries}"
       mix.info
       mix.each_track{ |track|
         @current_track = track
-        logger.info "Playing track"
+        logger.debug "Playing track"
         track.info
         track.play
         while track.playing?
@@ -59,9 +58,8 @@ class CUI8Tracks::Session
       }
     }
   end
-
   def avail_commands
-    %w{ pause skip skip_mix toggle_like like unlike toggle_fav fav unfav toggle_follow follow unfollow open help exit}
+    %w{ pause skip skip_mix toggle_like like unlike toggle_fav fav unfav toggle_follow follow unfollow open info help exit}
   end
 
   def execute(command)
@@ -69,13 +67,13 @@ class CUI8Tracks::Session
     when 'p'
       execute 'pause'
     when 'pause'
-      logger.info 'pause'
+      logger.debug 'pause'
       current_track.pause
     when 'skip'
-      logger.info 'skip track'
+      logger.debug 'skip track'
       current_track.stop
     when 'skip_mix'
-      logger.info 'skip mix'
+      logger.debug 'skip mix'
       current_mix.skip
     when 's'
       execute 'skip'
@@ -84,47 +82,49 @@ class CUI8Tracks::Session
     when '?'
       execute 'help'
     when 'help'
-      logger.info "available commands:"
-      logger.info avail_commands
+      logger.debug "available commands:"
+      logger.debug avail_commands
     when 'exit'
       current_track.stop
       exit
 
     when 'toggle_like'
       current_mix.toggle_like
-      logger.info "toggled like mix"
+      logger.debug "toggled like mix"
     when 'like'
       current_mix.like
-      logger.info "liked mix"
+      logger.debug "liked mix"
     when 'unlike'
       current_mix.unlike
-      logger.info "unliked mix"
+      logger.debug "unliked mix"
 
     when 'toggle_fav'
       current_track.toggle_fav
-      logger.info "toggled favorite track"
+      logger.debug "toggled favorite track"
     when 'fav'
       current_track.fav
-      logger.info "favorited track"
+      logger.debug "favorited track"
     when 'unfav'
       current_track.unfav
-      logger.info "unfavorited track"
+      logger.debug "unfavorited track"
 
     when 'toggle_follow'
       current_mix.user.toggle_follow
-      logger.info "toggled follow user"
+      logger.debug "toggled follow user"
     when 'follow'
       current_mix.user.follow
-      logger.info "followed user"
+      logger.debug "followed user"
     when 'unfollow'
       current_mix.user.unfollow
-      logger.info "unfollowed user"
+      logger.debug "unfollowed user"
 
     when 'open'
-      logger.info "open current mix"
+      logger.debug "open current mix"
       system "open #{current_mix.restful_url}"
+    when 'info'
+      print "Playing track >#{@current_track.name}< in mix >#{@current_mix.name}<"
     else
-      logger.info "unknown command: #{command}"
+      logger.debug "unknown command: #{command}"
       execute 'help'
     end
   end
@@ -137,11 +137,7 @@ class CUI8Tracks::Session
       while line = Readline.readline('> ')
         begin
           line = line.chomp.strip rescue ''
-          if line.empty?
-            Readline::HISTORY.pop
-            next
-          end
-          execute line
+          execute line unless line.empty?
         rescue => e
           logger.error "#{e.class}, #{e.message}"
           puts e.backtrace.join("\n")

@@ -3,7 +3,7 @@ class CUI8Tracks::Session
 
   def logger
     return @logger if @logger
-    @logger = self.config[:debug] ? Logger.new(STDOUT) : Logger.new(".cui8tracks.log", File::WRONLY | File::APPEND | File::CREAT)
+    @logger = Logger.new(".cui8tracks.log", File::WRONLY | File::APPEND | File::CREAT)
     @logger.level = self.config[:debug] ? Logger::DEBUG : Logger::INFO
     @logger
   end

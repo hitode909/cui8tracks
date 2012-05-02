@@ -99,8 +99,6 @@ class CUI8Tracks::Track
         :progress_proc => proc{ |now|
           if Time.now - from > 0.2
             from = Time.now
-            print "%3d%% #{now}/#{total}\r" % (now/total.to_f*100)
-            $stdout.flush
           end
         }
         ) {|remote|

@@ -14,7 +14,6 @@ module CUI8Tracks
       session.authorize(pit['username'], pit['password'])
       session.start_input_thread
       session.play
-
     end
   end
 end
